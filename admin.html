@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+
+.admin-topbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0d1230; border-bottom: 1px solid #2a2f4a; position: sticky; top: 0; z-index: 100; }
+.admin-topbar-left { display: flex; align-items: center; gap: 10px; }
+.admin-badge { background: linear-gradient(135deg, #ff6b00, #ffa500); color: white; font-size: 11px; padding: 5px 12px; border-radius: 15px; font-weight: bold; }
+.admin-topbar-title { font-size: 16px; font-weight: bold; }
+.logout-small { background: #ff3131; border: none; color: white; font-size: 11px; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+.stat-card { background: #1a1f3a; border-radius: 12px; padding: 15px; border: 1px solid #2a2f4a; }
+.stat-icon { font-size: 24px; margin-bottom: 8px; }
+.stat-value { font-size: 24px; font-weight: bold; color: #ffa500; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: #ccc; }
+
+.section-head { padding: 15px; font-size: 14px; font-weight: bold; color: #ffa500; }
+
+.action-list { padding: 0 15px; }
+.action-item { display: flex; align-items: center; justify-content: space-between; background: #1a1f3a; border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; cursor: pointer; border: 1px solid #2a2f4a; }
+.action-item:active { background: #2a2f4a; }
+.action-left { display: flex; align-items: center; gap: 15px; }
+.action-icon { font-size: 22px; width: 25px; text-align: center; }
+.action-text { font-size: 14px; color: white; font-weight: 500; }
+.action-arrow { font-size: 18px; color: #666; }
+.badge-count { background: #ff3131; color: white; font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: bold; margin-right: 8px; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; color: #666; font-size: 9px; padding: 5px 8px; flex: 1; }
+.nav-item.active { color: #ffa500; }
+.nav-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<!-- SECURITY CHECK FIRST (JS में) -->
+<div id="blockedScreen" style="display:none;padding:60px 20px;text-align:center;">
+<div style="font-size:60px;opacity:.5;margin-bottom:15px;">🔒</div>
+<div style="font-size:16px;color:#ff3131;font-weight:bold;margin-bottom:10px;">Access Denied</div>
+<div style="font-size:12px;color:#666;margin-bottom:20px;">You must login as admin first.</div>
+<button onclick="location.href='admin-login.html'" style="padding:14px 30px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">Go to Admin Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboardScreen" style="display:none;">
+<div class="admin-topbar">
+<div class="admin-topbar-left">
+<span class="admin-badge">ADMIN</span>
+<span class="admin-topbar-title">Dashboard</span>
+</div>
+<button class="logout-small" onclick="adminLogout()">Logout</button>
+</div>
+
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-icon">👥</div>
+<div class="stat-value" id="totalUsers">0</div>
+<div class="stat-label">Total Users</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">💰</div>
+<div class="stat-value" id="totalRevenue">₹0</div>
+<div class="stat-label">Total Revenue</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">🎮</div>
+<div class="stat-value" id="activeMatches">0</div>
+<div class="stat-label">Active Matches</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon">⏳</div>
+<div class="stat-value" id="pendingDeposits">0</div>
+<div class="stat-label">Pending Deposits</div>
+</div>
+</div>
+
+<div class="section-head">⚡ QUICK ACTIONS</div>
+
+<div class="action-list">
+<div class="action-item" onclick="location.href='admin-deposits.html'">
+<div class="action-left"><span class="action-icon">💳</span><span class="action-text">Deposit Management</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count">0</span><span class="action-arrow">›</span></div>
+</div>
+
+<div class="action-item" onclick="location.href='admin-withdrawals.html'">
+<div class="action-left"><span class="action-icon">💸</span><span class="action-text">Withdrawal Management</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count">0</span><span class="action-arrow">›</span></div>
+</div>
+
+<div class="action-item" onclick="location.href='admin-users.html'">
+<div class="action-left"><span class="action-icon">👥</span><span class="action-text">User Management</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-tournaments.html'">
+<div class="action-left"><span class="action-icon">🎮</span><span class="action-text">Tournament Manager</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-match-slots.html'">
+<div class="action-left"><span class="action-icon">📋</span><span class="action-text">Match Slots Viewer</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-result.html'">
+<div class="action-left"><span class="action-icon">🏆</span><span class="action-text">Result Upload</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-reports.html'">
+<div class="action-left"><span class="action-icon">🚩</span><span class="action-text">Player Reports</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count" id="pendingReportsBadge">0</span><span class="action-arrow">›</span></div>
+</div>
+
+<div class="action-item" onclick="location.href='admin-faq.html'">
+<div class="action-left"><span class="action-icon">❓</span><span class="action-text">Manage FAQ</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-about.html'">
+<div class="action-left"><span class="action-icon">ℹ️</span><span class="action-text">Manage About Us</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-privacy.html'">
+<div class="action-left"><span class="action-icon">🔒</span><span class="action-text">Manage Privacy Policy</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-terms.html'">
+<div class="action-left"><span class="action-icon">📜</span><span class="action-text">Manage Terms & Conditions</span></div>
+<span class="action-arrow">›</span>
+</div>
+
+<div class="action-item" onclick="location.href='admin-settings.html'">
+<div class="action-left"><span class="action-icon">⚙️</span><span class="action-text">Settings</span></div>
+<span class="action-arrow">›</span>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+<div class="nav-item active" onclick="location.href='admin.html'"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
+<div class="nav-item" onclick="location.href='admin-users.html'"><span class="nav-icon">👥</span><span>Users</span></div>
+<div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
+<div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
+<div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+</div>
+
+<script>
+// ================= SECURITY CHECK =================
+var SESSION_KEY='primeArenaAdmin';
+
+function isAdminLoggedIn(){
+try{
+return sessionStorage.getItem(SESSION_KEY)==='true'||localStorage.getItem(SESSION_KEY)==='true';
+}catch(e){
+return false;
+}
+}
+
+function adminLogout(){
+if(confirm('Are you sure you want to logout?')){
+try{
+sessionStorage.removeItem(SESSION_KEY);
+localStorage.removeItem(SESSION_KEY);
+}catch(e){}
+location.href='admin-login.html';
+}
+}
+
+// Check on page load
+if(!isAdminLoggedIn()){
+document.getElementById('blockedScreen').style.display='block';
+document.getElementById('dashboardScreen').style.display='none';
+document.getElementById('bottomNav').style.display='none';
+setTimeout(function(){
+location.href='admin-login.html';
+},1500);
+}else{
+document.getElementById('dashboardScreen').style.display='block';
+document.getElementById('bottomNav').style.display='flex';
+}
+</script>
+</body>
+</html>
