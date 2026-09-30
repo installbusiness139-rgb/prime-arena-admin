@@ -6,14 +6,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:100vh;padding-bottom:80px}
-
 .admin-topbar{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100}
 .admin-topbar-left{display:flex;align-items:center;gap:10px}
 .admin-badge{background:linear-gradient(135deg,#ff6b00,#ffa500);color:white;font-size:11px;padding:5px 12px;border-radius:15px;font-weight:bold}
 .admin-topbar-title{font-size:16px;font-weight:bold}
 .logout-small{background:#ff3131;border:none;color:white;font-size:11px;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
 .refresh-btn{background:#2a2f4a;border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:16px;cursor:pointer;margin-right:8px}
-
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
 .stat-card{background:#1a1f3a;border-radius:12px;padding:15px;border:1px solid #2a2f4a;position:relative}
 .stat-card.alert{border-color:#ff3131;box-shadow:0 0 15px rgba(255,49,49,0.3)}
@@ -23,9 +21,6 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 .stat-label{font-size:11px;color:#ccc}
 .stat-badge{position:absolute;top:10px;right:10px;background:#ff3131;color:white;font-size:9px;padding:3px 7px;border-radius:10px;font-weight:bold;min-width:18px;text-align:center;display:none}
 .stat-badge.show{display:block}
-.stat-card.pending{border-color:#ffa500}
-.stat-card.pending .stat-value{color:#ffa500}
-
 .section-head{padding:15px;font-size:14px;font-weight:bold;color:#ffa500}
 .action-list{padding:0 15px}
 .action-item{display:flex;align-items:center;justify-content:space-between;background:#1a1f3a;border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;border:1px solid #2a2f4a;transition:.2s}
@@ -36,12 +31,10 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 .action-arrow{font-size:18px;color:#666}
 .badge-count{background:#ff3131;color:white;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold;margin-right:8px;display:none;min-width:20px;text-align:center}
 .badge-count.show{display:inline-block}
-
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #2a2f4a;z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:#666;font-size:9px;padding:5px 8px;flex:1}
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:20px}
-
 .popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:20px}
 .popup-overlay.show{display:flex}
 .popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:12px;padding:25px 20px;width:100%;max-width:350px;text-align:center}
@@ -55,14 +48,6 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 </head>
 <body>
 
-<div id="blockedScreen" style="display:none;padding:60px 20px;text-align:center;">
-<div style="font-size:60px;opacity:.5;margin-bottom:15px;">🔒</div>
-<div style="font-size:16px;color:#ff3131;font-weight:bold;margin-bottom:10px;">Access Denied</div>
-<div style="font-size:12px;color:#666;margin-bottom:20px;">You must login as admin first.</div>
-<button onclick="location.href='admin-login.html'" style="padding:14px 30px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">Go to Admin Login</button>
-</div>
-
-<div class="dashboard" id="dashboardScreen" style="display:none;">
 <div class="admin-topbar">
 <div class="admin-topbar-left">
 <span class="admin-badge">ADMIN</span>
@@ -85,7 +70,7 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 <div class="stat-value loading" id="totalRevenue">...</div>
 <div class="stat-label">Total Revenue</div>
 </div>
-<div class="stat-card" id="activeMatchesCard">
+<div class="stat-card">
 <div class="stat-icon">🎮</div>
 <div class="stat-value loading" id="activeMatches">...</div>
 <div class="stat-label">Active Matches</div>
@@ -171,9 +156,8 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 <span class="action-arrow">›</span>
 </div>
 </div>
-</div>
 
-<div class="bottom-nav" id="bottomNav" style="display:none;">
+<div class="bottom-nav">
 <div class="nav-item active" onclick="location.href='admin.html'"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
 <div class="nav-item" onclick="location.href='admin-users.html'"><span class="nav-icon">👥</span><span>Users</span></div>
 <div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
@@ -199,24 +183,13 @@ var db=firebase.firestore();
 
 var SESSION_KEY='primeArenaAdmin';
 
-function isAdminLoggedIn(){
-try{
-return sessionStorage.getItem(SESSION_KEY)==='true'||localStorage.getItem(SESSION_KEY)==='true';
-}catch(e){
-return false;
-}
-}
-
 function openLogoutPopup(){
 document.getElementById('logoutPopup').classList.add('show');
 }
-
 function closeLogoutPopup(){
 document.getElementById('logoutPopup').classList.remove('show');
 }
-
 function confirmLogout(){
-closeLogoutPopup();
 try{
 sessionStorage.removeItem(SESSION_KEY);
 localStorage.removeItem(SESSION_KEY);
@@ -229,39 +202,48 @@ if(e.target===this)closeLogoutPopup();
 });
 
 // ============ LOAD ALL COUNTS ============
-async function loadAllCounts(){
-try{
-// Users
+function loadAllCounts(){
+// Users + Revenue
 db.collection('users').get().then(function(snap){
-document.getElementById('totalUsers').textContent=snap.size;
-document.getElementById('totalUsers').classList.remove('loading');
+var usersEl=document.getElementById('totalUsers');
+usersEl.textContent=snap.size;
+usersEl.classList.remove('loading');
 
 var revenue=0;
 snap.forEach(function(doc){
 var d=doc.data();
 revenue+=(d.deposited||0);
 });
-document.getElementById('totalRevenue').textContent='₹'+revenue;
-document.getElementById('totalRevenue').classList.remove('loading');
+var revEl=document.getElementById('totalRevenue');
+revEl.textContent='₹'+revenue;
+revEl.classList.remove('loading');
 }).catch(function(e){
-document.getElementById('totalUsers').textContent='0';
-document.getElementById('totalUsers').classList.remove('loading');
+console.warn('Users error:',e.message);
+var usersEl=document.getElementById('totalUsers');
+usersEl.textContent='0';
+usersEl.classList.remove('loading');
+var revEl=document.getElementById('totalRevenue');
+revEl.textContent='₹0';
+revEl.classList.remove('loading');
 });
 
 // Active Matches
 db.collection('matches').where('status','==','upcoming').get().then(function(snap){
-document.getElementById('activeMatches').textContent=snap.size;
-document.getElementById('activeMatches').classList.remove('loading');
+var el=document.getElementById('activeMatches');
+el.textContent=snap.size;
+el.classList.remove('loading');
 }).catch(function(e){
-document.getElementById('activeMatches').textContent='0';
-document.getElementById('activeMatches').classList.remove('loading');
+var el=document.getElementById('activeMatches');
+el.textContent='0';
+el.classList.remove('loading');
 });
 
 // Pending Deposits
 db.collection('deposits').where('status','==','pending').get().then(function(snap){
 var c=snap.size;
-document.getElementById('pendingDeposits').textContent=c;
-document.getElementById('pendingDeposits').classList.remove('loading');
+var el=document.getElementById('pendingDeposits');
+el.textContent=c;
+el.classList.remove('loading');
 var badge=document.getElementById('pendingDepositsBadge');
 var listBadge=document.getElementById('depositsBadge');
 if(c>0){
@@ -276,8 +258,9 @@ listBadge.classList.remove('show');
 document.getElementById('pendingDepositsCard').classList.remove('alert');
 }
 }).catch(function(e){
-document.getElementById('pendingDeposits').textContent='0';
-document.getElementById('pendingDeposits').classList.remove('loading');
+var el=document.getElementById('pendingDeposits');
+el.textContent='0';
+el.classList.remove('loading');
 });
 
 // Pending Withdrawals
@@ -315,26 +298,11 @@ listBadge.classList.add('show');
 listBadge.classList.remove('show');
 }
 }).catch(function(e){});
-
-}catch(e){
-console.error('Count load error:',e);
-}
 }
 
-// Check login
-if(!isAdminLoggedIn()){
-document.getElementById('blockedScreen').style.display='block';
-document.getElementById('dashboardScreen').style.display='none';
-document.getElementById('bottomNav').style.display='none';
-setTimeout(function(){
-location.href='admin-login.html';
-},1500);
-}else{
-document.getElementById('dashboardScreen').style.display='block';
-document.getElementById('bottomNav').style.display='flex';
+// Load on page start
 loadAllCounts();
 setInterval(loadAllCounts,30000);
-}
 </script>
 </body>
-</html>
+  </html>
