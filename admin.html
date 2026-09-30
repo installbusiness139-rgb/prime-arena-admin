@@ -4,47 +4,53 @@
 <title>Admin Panel - Prime Arena</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:100vh;padding-bottom:80px}
 
-.admin-topbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0d1230; border-bottom: 1px solid #2a2f4a; position: sticky; top: 0; z-index: 100; }
-.admin-topbar-left { display: flex; align-items: center; gap: 10px; }
-.admin-badge { background: linear-gradient(135deg, #ff6b00, #ffa500); color: white; font-size: 11px; padding: 5px 12px; border-radius: 15px; font-weight: bold; }
-.admin-topbar-title { font-size: 16px; font-weight: bold; }
-.logout-small { background: #ff3131; border: none; color: white; font-size: 11px; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.admin-topbar{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100}
+.admin-topbar-left{display:flex;align-items:center;gap:10px}
+.admin-badge{background:linear-gradient(135deg,#ff6b00,#ffa500);color:white;font-size:11px;padding:5px 12px;border-radius:15px;font-weight:bold}
+.admin-topbar-title{font-size:16px;font-weight:bold}
+.logout-small{background:#ff3131;border:none;color:white;font-size:11px;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
+.refresh-btn{background:#2a2f4a;border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:16px;cursor:pointer;margin-right:8px}
 
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
-.stat-card { background: #1a1f3a; border-radius: 12px; padding: 15px; border: 1px solid #2a2f4a; }
-.stat-icon { font-size: 24px; margin-bottom: 8px; }
-.stat-value { font-size: 24px; font-weight: bold; color: #ffa500; margin-bottom: 4px; }
-.stat-label { font-size: 11px; color: #ccc; }
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
+.stat-card{background:#1a1f3a;border-radius:12px;padding:15px;border:1px solid #2a2f4a;position:relative}
+.stat-card.alert{border-color:#ff3131;box-shadow:0 0 15px rgba(255,49,49,0.3)}
+.stat-icon{font-size:24px;margin-bottom:8px}
+.stat-value{font-size:24px;font-weight:bold;color:#ffa500;margin-bottom:4px}
+.stat-value.loading{color:#888;font-size:16px}
+.stat-label{font-size:11px;color:#ccc}
+.stat-badge{position:absolute;top:10px;right:10px;background:#ff3131;color:white;font-size:9px;padding:3px 7px;border-radius:10px;font-weight:bold;min-width:18px;text-align:center;display:none}
+.stat-badge.show{display:block}
+.stat-card.pending{border-color:#ffa500}
+.stat-card.pending .stat-value{color:#ffa500}
 
-.section-head { padding: 15px; font-size: 14px; font-weight: bold; color: #ffa500; }
+.section-head{padding:15px;font-size:14px;font-weight:bold;color:#ffa500}
+.action-list{padding:0 15px}
+.action-item{display:flex;align-items:center;justify-content:space-between;background:#1a1f3a;border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;border:1px solid #2a2f4a;transition:.2s}
+.action-item:active{background:#2a2f4a}
+.action-left{display:flex;align-items:center;gap:15px}
+.action-icon{font-size:22px;width:25px;text-align:center}
+.action-text{font-size:14px;color:white;font-weight:500}
+.action-arrow{font-size:18px;color:#666}
+.badge-count{background:#ff3131;color:white;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold;margin-right:8px;display:none;min-width:20px;text-align:center}
+.badge-count.show{display:inline-block}
 
-.action-list { padding: 0 15px; }
-.action-item { display: flex; align-items: center; justify-content: space-between; background: #1a1f3a; border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; cursor: pointer; border: 1px solid #2a2f4a; }
-.action-item:active { background: #2a2f4a; }
-.action-left { display: flex; align-items: center; gap: 15px; }
-.action-icon { font-size: 22px; width: 25px; text-align: center; }
-.action-text { font-size: 14px; color: white; font-weight: 500; }
-.action-arrow { font-size: 18px; color: #666; }
-.badge-count { background: #ff3131; color: white; font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: bold; margin-right: 8px; }
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #2a2f4a;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:#666;font-size:9px;padding:5px 8px;flex:1}
+.nav-item.active{color:#ffa500}
+.nav-icon{font-size:20px}
 
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; color: #666; font-size: 9px; padding: 5px 8px; flex: 1; }
-.nav-item.active { color: #ffa500; }
-.nav-icon { font-size: 20px; }
-
-.popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(3px); padding: 20px; }
-.popup-overlay.show { display: flex; }
-.popup-box { background: #0f121d; border: 1px solid #d4af37; border-radius: 12px; padding: 25px 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-.popup-box h3 { color: #fca311; margin-top: 0; font-size: 22px; margin-bottom: 10px; }
-.popup-box p { color: #ffffff; font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
-.popup-buttons { display: flex; gap: 12px; }
-.popup-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-.popup-btn-cancel { background: #2a2d3e; color: #ffffff; }
-.popup-btn-confirm { background: #10b981; color: #ffffff; }
-.popup-btn:active { transform: scale(0.95); }
+.popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:20px}
+.popup-overlay.show{display:flex}
+.popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:12px;padding:25px 20px;width:100%;max-width:350px;text-align:center}
+.popup-box h3{color:#fca311;margin-top:0;font-size:22px;margin-bottom:10px}
+.popup-box p{color:#ffffff;font-size:15px;margin-bottom:25px;line-height:1.5}
+.popup-buttons{display:flex;gap:12px}
+.popup-btn{flex:1;padding:12px;border:none;border-radius:8px;font-weight:bold;font-size:15px;cursor:pointer;text-transform:uppercase}
+.popup-btn-cancel{background:#2a2d3e;color:#ffffff}
+.popup-btn-confirm{background:#10b981;color:#ffffff}
 </style>
 </head>
 <body>
@@ -62,29 +68,33 @@ body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-
 <span class="admin-badge">ADMIN</span>
 <span class="admin-topbar-title">Dashboard</span>
 </div>
+<div style="display:flex;align-items:center;">
+<button class="refresh-btn" onclick="loadAllCounts()">↻</button>
 <button class="logout-small" onclick="openLogoutPopup()">Logout</button>
+</div>
 </div>
 
 <div class="stats-grid">
 <div class="stat-card">
 <div class="stat-icon">👥</div>
-<div class="stat-value" id="totalUsers">0</div>
+<div class="stat-value loading" id="totalUsers">...</div>
 <div class="stat-label">Total Users</div>
 </div>
 <div class="stat-card">
 <div class="stat-icon">💰</div>
-<div class="stat-value" id="totalRevenue">₹0</div>
+<div class="stat-value loading" id="totalRevenue">...</div>
 <div class="stat-label">Total Revenue</div>
 </div>
-<div class="stat-card">
+<div class="stat-card" id="activeMatchesCard">
 <div class="stat-icon">🎮</div>
-<div class="stat-value" id="activeMatches">0</div>
+<div class="stat-value loading" id="activeMatches">...</div>
 <div class="stat-label">Active Matches</div>
 </div>
-<div class="stat-card">
+<div class="stat-card" id="pendingDepositsCard">
 <div class="stat-icon">⏳</div>
-<div class="stat-value" id="pendingDeposits">0</div>
+<div class="stat-value loading" id="pendingDeposits">...</div>
 <div class="stat-label">Pending Deposits</div>
+<span class="stat-badge" id="pendingDepositsBadge">0</span>
 </div>
 </div>
 
@@ -93,17 +103,18 @@ body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-
 <div class="action-list">
 <div class="action-item" onclick="location.href='admin-deposits.html'">
 <div class="action-left"><span class="action-icon">💳</span><span class="action-text">Deposit Management</span></div>
-<div style="display:flex;align-items:center;"><span class="badge-count">0</span><span class="action-arrow">›</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count" id="depositsBadge">0</span><span class="action-arrow">›</span></div>
 </div>
 
 <div class="action-item" onclick="location.href='admin-withdrawals.html'">
 <div class="action-left"><span class="action-icon">💸</span><span class="action-text">Withdrawal Management</span></div>
-<div style="display:flex;align-items:center;"><span class="badge-count">0</span><span class="action-arrow">›</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count" id="withdrawalsBadge">0</span><span class="action-arrow">›</span></div>
 </div>
-  <div class="action-item" onclick="location.href='admin-redeem.html'">
+
+<div class="action-item" onclick="location.href='admin-redeem.html'">
 <div class="action-left"><span class="action-icon">🎁</span><span class="action-text">Redeem Requests</span></div>
-<span class="action-arrow">›</span>
-  </div>
+<div style="display:flex;align-items:center;"><span class="badge-count" id="redeemBadge">0</span><span class="action-arrow">›</span></div>
+</div>
 
 <div class="action-item" onclick="location.href='admin-users.html'">
 <div class="action-left"><span class="action-icon">👥</span><span class="action-text">User Management</span></div>
@@ -127,7 +138,7 @@ body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-
 
 <div class="action-item" onclick="location.href='admin-reports.html'">
 <div class="action-left"><span class="action-icon">🚩</span><span class="action-text">Player Reports</span></div>
-<div style="display:flex;align-items:center;"><span class="badge-count" id="pendingReportsBadge">0</span><span class="action-arrow">›</span></div>
+<div style="display:flex;align-items:center;"><span class="badge-count" id="reportsBadge">0</span><span class="action-arrow">›</span></div>
 </div>
 
 <div class="action-item" onclick="location.href='admin-contact.html'">
@@ -179,9 +190,13 @@ body { background: #0a0e27; color: white; font-family: 'Arial', sans-serif; min-
 <button class="popup-btn popup-btn-confirm" onclick="confirmLogout()">LOGOUT</button>
 </div>
 </div>
-</div>
+  </div>
+  <script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
-<script>
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
 var SESSION_KEY='primeArenaAdmin';
 
 function isAdminLoggedIn(){
@@ -213,6 +228,100 @@ document.getElementById('logoutPopup').addEventListener('click',function(e){
 if(e.target===this)closeLogoutPopup();
 });
 
+// ============ LOAD ALL COUNTS ============
+async function loadAllCounts(){
+try{
+// Users
+db.collection('users').get().then(function(snap){
+document.getElementById('totalUsers').textContent=snap.size;
+document.getElementById('totalUsers').classList.remove('loading');
+
+var revenue=0;
+snap.forEach(function(doc){
+var d=doc.data();
+revenue+=(d.deposited||0);
+});
+document.getElementById('totalRevenue').textContent='₹'+revenue;
+document.getElementById('totalRevenue').classList.remove('loading');
+}).catch(function(e){
+document.getElementById('totalUsers').textContent='0';
+document.getElementById('totalUsers').classList.remove('loading');
+});
+
+// Active Matches
+db.collection('matches').where('status','==','upcoming').get().then(function(snap){
+document.getElementById('activeMatches').textContent=snap.size;
+document.getElementById('activeMatches').classList.remove('loading');
+}).catch(function(e){
+document.getElementById('activeMatches').textContent='0';
+document.getElementById('activeMatches').classList.remove('loading');
+});
+
+// Pending Deposits
+db.collection('deposits').where('status','==','pending').get().then(function(snap){
+var c=snap.size;
+document.getElementById('pendingDeposits').textContent=c;
+document.getElementById('pendingDeposits').classList.remove('loading');
+var badge=document.getElementById('pendingDepositsBadge');
+var listBadge=document.getElementById('depositsBadge');
+if(c>0){
+badge.textContent=c;
+badge.classList.add('show');
+listBadge.textContent=c;
+listBadge.classList.add('show');
+document.getElementById('pendingDepositsCard').classList.add('alert');
+}else{
+badge.classList.remove('show');
+listBadge.classList.remove('show');
+document.getElementById('pendingDepositsCard').classList.remove('alert');
+}
+}).catch(function(e){
+document.getElementById('pendingDeposits').textContent='0';
+document.getElementById('pendingDeposits').classList.remove('loading');
+});
+
+// Pending Withdrawals
+db.collection('withdrawals').where('status','==','pending').get().then(function(snap){
+var c=snap.size;
+var listBadge=document.getElementById('withdrawalsBadge');
+if(c>0){
+listBadge.textContent=c;
+listBadge.classList.add('show');
+}else{
+listBadge.classList.remove('show');
+}
+}).catch(function(e){});
+
+// Pending Redeem
+db.collection('redeem_requests').where('status','==','pending').get().then(function(snap){
+var c=snap.size;
+var listBadge=document.getElementById('redeemBadge');
+if(c>0){
+listBadge.textContent=c;
+listBadge.classList.add('show');
+}else{
+listBadge.classList.remove('show');
+}
+}).catch(function(e){});
+
+// Pending Reports
+db.collection('reports').where('status','==','pending').get().then(function(snap){
+var c=snap.size;
+var listBadge=document.getElementById('reportsBadge');
+if(c>0){
+listBadge.textContent=c;
+listBadge.classList.add('show');
+}else{
+listBadge.classList.remove('show');
+}
+}).catch(function(e){});
+
+}catch(e){
+console.error('Count load error:',e);
+}
+}
+
+// Check login
 if(!isAdminLoggedIn()){
 document.getElementById('blockedScreen').style.display='block';
 document.getElementById('dashboardScreen').style.display='none';
@@ -223,7 +332,9 @@ location.href='admin-login.html';
 }else{
 document.getElementById('dashboardScreen').style.display='block';
 document.getElementById('bottomNav').style.display='flex';
+loadAllCounts();
+setInterval(loadAllCounts,30000);
 }
 </script>
 </body>
-  </html>
+</html>
