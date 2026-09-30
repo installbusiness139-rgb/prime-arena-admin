@@ -34,12 +34,28 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .status-completed{background:#00c853;color:white}
 .status-rejected{background:#ff3131;color:white}
 .redeem-details{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-size:12px}
-.detail-row{display:flex;justify-content:space-between}
-.detail-label{color:#666}
-.detail-value{color:#ccc;font-weight:500;word-break:break-all;text-align:right;max-width:60%}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.detail-label{color:#666;flex-shrink:0}
+.detail-value{color:#ccc;font-weight:500;word-break:break-all;text-align:right;max-width:65%}
 .detail-value.coins{color:#ffa500;font-weight:bold}
 .detail-value.inr{color:#00e676;font-weight:bold}
 .detail-value.whatsapp{color:#25d366;font-family:monospace;letter-spacing:1px}
+.user-info-section{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:12px;margin-bottom:12px}
+.user-info-section .ui-title{font-size:10px;color:#ffa500;letter-spacing:1px;margin-bottom:8px;font-weight:bold}
+.balance-section{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:12px;margin-bottom:12px}
+.balance-section.safe{border-color:#00c853;background:rgba(0,200,83,0.08)}
+.balance-section.warning{border-color:#ff3131;background:rgba(255,49,49,0.1)}
+.balance-section .bs-title{font-size:10px;color:#888;letter-spacing:1px;margin-bottom:8px;font-weight:bold}
+.balance-section.safe .bs-title{color:#00c853}
+.balance-section.warning .bs-title{color:#ff3131}
+.balance-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.balance-item{text-align:center}
+.balance-item .bi-label{font-size:9px;color:#666;margin-bottom:3px}
+.balance-item .bi-value{font-size:14px;font-weight:bold;color:#fff}
+.balance-item.winning .bi-value{color:#ffa500}
+.balance-item.deposited .bi-value{color:#00e676}
+.balance-warning-msg{font-size:10px;color:#ff6b6b;text-align:center;margin-top:8px;line-height:1.4}
+.balance-safe-msg{font-size:10px;color:#00e676;text-align:center;margin-top:8px;line-height:1.4;font-weight:bold}
 .timer-display{background:#0a0e27;border:2px solid #ff5252;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center}
 .timer-display.over{border-color:#ff3131;background:rgba(255,49,49,0.15)}
 .timer-display .tlbl{font-size:10px;color:#ff5252;letter-spacing:2px;margin-bottom:5px;font-weight:bold}
@@ -68,7 +84,7 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:14px;padding:25px 20px;width:100%;max-width:360px;text-align:center}
 .popup-icon{font-size:45px;margin-bottom:12px}
 .popup-title{color:#fca311;font-size:19px;font-weight:bold;margin-bottom:10px}
-.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px}
+.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px;white-space:pre-line}
 .popup-buttons{display:flex;gap:10px}
 .popup-btn{flex:1;padding:13px;border:none;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;text-transform:uppercase}
 .popup-btn-cancel{background:#2a2d3e;color:#fff}
@@ -130,8 +146,8 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 <div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
 <div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
 <div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-  </div>
-  <script>
+                                                                                                                   </div>
+                                                                                                                   <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -139,6 +155,7 @@ var db=firebase.firestore();
 
 var currentFilter='pending';
 var allRedeems=[];
+var userData={};
 var timerIntervals=[];
 
 function clearAllTimers(){
@@ -194,16 +211,11 @@ btnRow.innerHTML='';
 var cancelBtn=document.createElement('button');
 cancelBtn.textContent='CANCEL';
 cancelBtn.className='popup-btn popup-btn-cancel';
-cancelBtn.onclick=function(){
-document.getElementById('customPopup').classList.remove('show');
-};
+cancelBtn.onclick=function(){document.getElementById('customPopup').classList.remove('show');};
 var confirmBtn=document.createElement('button');
 confirmBtn.textContent=btnLabel;
 confirmBtn.className='popup-btn '+(btnClass||'popup-btn-confirm');
-confirmBtn.onclick=function(){
-document.getElementById('customPopup').classList.remove('show');
-if(callback)callback();
-};
+confirmBtn.onclick=function(){document.getElementById('customPopup').classList.remove('show');if(callback)callback();};
 btnRow.appendChild(cancelBtn);
 btnRow.appendChild(confirmBtn);
 document.getElementById('customPopup').classList.add('show');
@@ -218,9 +230,7 @@ btnRow.innerHTML='';
 var okBtn=document.createElement('button');
 okBtn.textContent='OK';
 okBtn.className='popup-btn popup-btn-confirm';
-okBtn.onclick=function(){
-document.getElementById('customPopup').classList.remove('show');
-};
+okBtn.onclick=function(){document.getElementById('customPopup').classList.remove('show');};
 btnRow.appendChild(okBtn);
 document.getElementById('customPopup').classList.add('show');
 }
@@ -240,6 +250,35 @@ t.style.display='block';
 setTimeout(function(){t.style.display='none'},3000);
 }
 
+async function loadUserData(){
+try{
+var userIds=[];
+allRedeems.forEach(function(r){
+if(r.userId&&userIds.indexOf(r.userId)===-1)userIds.push(r.userId);
+});
+var promises=userIds.map(function(uid){
+return db.collection('users').doc(uid).get().then(function(doc){
+if(doc.exists){
+var d=doc.data();
+userData[uid]={
+name:d.name||'Unknown',
+email:d.email||'-',
+phone:d.phone||'-',
+ffIgn:d.ffIgn||'-',
+balance:d.balance||0,
+deposited:d.deposited||0,
+winning:d.winning||0,
+isBlocked:d.isBlocked||false
+};
+}
+});
+});
+await Promise.all(promises);
+}catch(e){
+console.error('User load error:',e);
+}
+}
+
 function loadRedeems(){
 db.collection('redeem_requests').get().then(function(snapshot){
 allRedeems=[];
@@ -251,8 +290,10 @@ allRedeems.push(d);
 allRedeems.sort(function(a,b){
 return new Date(b.createdAt||0)-new Date(a.createdAt||0);
 });
+loadUserData().then(function(){
 updateStats();
 displayRedeems();
+});
 }).catch(function(e){
 document.getElementById('redeemList').innerHTML='<div class="empty-state"><div class="empty-icon">X</div><div class="empty-text">Error: '+e.message+'</div></div>';
 });
@@ -297,6 +338,23 @@ var status=r.status||'pending';
 var date=new Date(r.createdAt);
 var timeStr=date.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
 
+var u=userData[r.userId]||{name:r.userName||'Unknown',email:r.userEmail||'-',phone:'-',ffIgn:'-',balance:0,deposited:0,winning:0};
+
+var isEnough=u.winning>=r.coins;
+var balanceClass=isEnough?'safe':'warning';
+var balanceMsg=isEnough?'✅ User has enough winning balance':'⚠️ WARNING: Not enough winning balance!';
+var balanceMsgClass=isEnough?'balance-safe-msg':'balance-warning-msg';
+
+var balanceHtml='<div class="balance-section '+balanceClass+'">'+
+'<div class="bs-title">USER BALANCE CHECK</div>'+
+'<div class="balance-grid">'+
+'<div class="balance-item"><div class="bi-label">Total</div><div class="bi-value">'+u.balance+'</div></div>'+
+'<div class="balance-item deposited"><div class="bi-label">Deposited</div><div class="bi-value">'+u.deposited+'</div></div>'+
+'<div class="balance-item winning"><div class="bi-label">Winning</div><div class="bi-value">'+u.winning+'</div></div>'+
+'</div>'+
+'<div class="'+balanceMsgClass+'">'+balanceMsg+'</div>'+
+'</div>';
+
 var timerHtml='';
 if(status==='pending'){
 timerHtml='<div class="timer-display" data-timer-for="'+r.id+'">'+
@@ -337,9 +395,17 @@ html+='<div class="redeem-card '+status+'">'+
 '<div class="redeem-status status-'+status+'">'+status+'</div>'+
 '</div>'+
 
+'<div class="user-info-section">'+
+'<div class="ui-title">👤 USER DETAILS</div>'+
+'<div class="detail-row"><span class="detail-label">Name:</span><span class="detail-value" style="color:#fff;font-weight:bold">'+u.name+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">'+u.email+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Mobile:</span><span class="detail-value" style="color:#00e676;font-family:monospace">'+u.phone+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">FF IGN:</span><span class="detail-value" style="color:#ffa500;font-weight:bold">'+u.ffIgn+'</span></div>'+
+'</div>'+
+
+balanceHtml+
+
 '<div class="redeem-details">'+
-'<div class="detail-row"><span class="detail-label">User:</span><span class="detail-value">'+(r.userName||'Unknown')+'</span></div>'+
-'<div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">'+(r.userEmail||'-')+'</span></div>'+
 '<div class="detail-row"><span class="detail-label">Coins:</span><span class="detail-value coins">'+r.coins+'</span></div>'+
 '<div class="detail-row"><span class="detail-label">Amount:</span><span class="detail-value inr">₹'+r.amountINR+'</span></div>'+
 '<div class="detail-row"><span class="detail-label">Cut (3%):</span><span class="detail-value" style="color:#ff3131">₹'+r.cutINR+'</span></div>'+
@@ -360,26 +426,50 @@ startAllTimers();
 function sendCode(id){
 var r=allRedeems.find(function(x){return x.id===id});
 if(!r)return;
+var u=userData[r.userId]||{name:'User',winning:0};
+if(u.winning<r.coins){
+showAlert('⚠️','Not Enough Balance','User has only '+u.winning+' coins in winning balance. Cannot send code.');
+return;
+}
 var codeInput=document.getElementById('code-'+id);
 var code=codeInput.value.trim();
-
 if(!code){
 showAlert('⚠️','Code Missing','Please enter the redeem code before sending.');
 return;
 }
 
-showConfirm('📤','Send Code?','Send code to '+r.userName+'?\n\nCode will appear in the user\'s app notification.\nWhatsApp me sirf alert jayega.','SEND','popup-btn-confirm',function(){
+showConfirm('📤','Send Code?','Send code to '+u.name+'?\n\nCoins will be deducted from user\'s winning balance.\n\nWhatsApp me sirf alert jayega.','SEND','popup-btn-confirm',function(){
 showLoading('Sending code...');
-db.collection('redeem_requests').doc(id).update({
+db.collection('users').doc(r.userId).get().then(function(doc){
+if(doc.exists){
+var d=doc.data();
+var cw=d.winning||0;
+return db.collection('users').doc(r.userId).update({
+winning:Math.max(0,cw-r.coins)
+});
+}
+}).then(function(){
+return db.collection('redeem_requests').doc(id).update({
 status:'completed',
 redeemCode:code,
 completedAt:new Date().toISOString()
+});
+}).then(function(){
+return db.collection('transactions').add({
+userId:r.userId,
+type:'redeem',
+coins:r.coins,
+amount:r.amountINR,
+status:'completed',
+redeemCode:code,
+timestamp:new Date().toISOString()
+});
 }).then(function(){
 hideLoading();
-var msg='🎁 *Prime Arena*\n\nHello '+r.userName+'!\n\n✅ Aapka redeem code app me bhej diya gaya hai.\n\n📱 App kholo → 🔔 Notification me jaao → Apna code copy karo.\n\n⚠️ Code app me safe rakha gaya hai. Kisi ke saath share na karein.\n\nThank you for playing! 🎮';
+var msg='🎁 *Prime Arena*\n\nHello '+u.name+'!\n\n✅ Aapka redeem code app me bhej diya gaya hai.\n\n📱 App kholo → 🔔 Notification me jaao → Apna code copy karo.\n\n⚠️ Code app me safe rakha gaya hai. Kisi ke saath share na karein.\n\nThank you for playing! 🎮';
 var waUrl='https://wa.me/91'+r.whatsappNumber+'?text='+encodeURIComponent(msg);
 window.open(waUrl,'_blank');
-showToast('✅ Code sent to app! WhatsApp notified.');
+showToast('✅ Code sent! Balance deducted.');
 loadRedeems();
 }).catch(function(e){
 hideLoading();
@@ -391,7 +481,8 @@ showAlert('❌','Error',e.message);
 function rejectRedeem(id){
 var r=allRedeems.find(function(x){return x.id===id});
 if(!r)return;
-showConfirm('⚠️','Reject Request?','Reject '+r.userName+'\'s redeem request of '+r.coins+' coins?','REJECT','popup-btn-danger',function(){
+var u=userData[r.userId]||{name:'User'};
+showConfirm('⚠️','Reject Request?','Reject '+u.name+'\'s redeem request of '+r.coins+' coins?','REJECT','popup-btn-danger',function(){
 showLoading('Rejecting...');
 db.collection('redeem_requests').doc(id).update({
 status:'rejected',
