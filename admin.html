@@ -12,10 +12,9 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 .admin-topbar-title{font-size:16px;font-weight:bold}
 .logout-small{background:#ff3131;border:none;color:white;font-size:11px;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
-.stat-card{background:#1a1f3a;border-radius:12px;padding:15px;border:1px solid #2a2f4a;position:relative}
+.stat-card{background:#1a1f3a;border-radius:12px;padding:15px;border:1px solid #2a2f4a}
 .stat-icon{font-size:24px;margin-bottom:8px}
 .stat-value{font-size:24px;font-weight:bold;color:#ffa500;margin-bottom:4px}
-.stat-value.loading{color:#888;font-size:16px}
 .stat-label{font-size:11px;color:#ccc}
 .section-head{padding:15px;font-size:14px;font-weight:bold;color:#ffa500}
 .action-list{padding:0 15px}
@@ -47,30 +46,28 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 <span class="admin-badge">ADMIN</span>
 <span class="admin-topbar-title">Dashboard</span>
 </div>
-<div style="display:flex;align-items:center;">
 <button class="logout-small" onclick="openLogoutPopup()">Logout</button>
-</div>
 </div>
 
 <div class="stats-grid">
 <div class="stat-card">
 <div class="stat-icon">👥</div>
-<div class="stat-value loading" id="totalUsers">...</div>
+<div class="stat-value" id="totalUsers">0</div>
 <div class="stat-label">Total Users</div>
 </div>
 <div class="stat-card">
 <div class="stat-icon">💰</div>
-<div class="stat-value loading" id="totalRevenue">...</div>
+<div class="stat-value" id="totalRevenue">₹0</div>
 <div class="stat-label">Total Revenue</div>
 </div>
 <div class="stat-card">
 <div class="stat-icon">🎮</div>
-<div class="stat-value loading" id="activeMatches">...</div>
+<div class="stat-value" id="activeMatches">0</div>
 <div class="stat-label">Active Matches</div>
 </div>
 <div class="stat-card">
 <div class="stat-icon">⏳</div>
-<div class="stat-value loading" id="pendingDeposits">...</div>
+<div class="stat-value" id="pendingDeposits">0</div>
 <div class="stat-label">Pending Deposits</div>
 </div>
 </div>
@@ -166,83 +163,26 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 <button class="popup-btn popup-btn-confirm" onclick="confirmLogout()">LOGOUT</button>
 </div>
 </div>
-                               <script>
-alert('1. Script shuru ho gaya');
+</div>
 
-var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
-
-try {
-if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-var db=firebase.firestore();
-alert('2. Firebase connect ho gaya');
-} catch(e) {
-alert('2. Firebase ERROR: ' + e.message);
+<script>
+function openLogoutPopup(){
+document.getElementById('logoutPopup').classList.add('show');
 }
-
-function openLogoutPopup(){document.getElementById('logoutPopup').classList.add('show');}
-function closeLogoutPopup(){document.getElementById('logoutPopup').classList.remove('show');}
+function closeLogoutPopup(){
+document.getElementById('logoutPopup').classList.remove('show');
+}
 function confirmLogout(){
-try{sessionStorage.removeItem('primeArenaAdmin');localStorage.removeItem('primeArenaAdmin');}catch(e){}
+try{
+sessionStorage.removeItem('primeArenaAdmin');
+localStorage.removeItem('primeArenaAdmin');
+}catch(e){}
 location.href='admin-login.html';
 }
-document.getElementById('logoutPopup').addEventListener('click',function(e){if(e.target===this)closeLogoutPopup();});
 
-alert('3. Functions ready, ab data load karenge');
-
-// Test: Users collection
-db.collection('users').get().then(function(snap){
-alert('4. Users load hue: ' + snap.size);
-document.getElementById('totalUsers').textContent=snap.size;
-document.getElementById('totalUsers').classList.remove('loading');
-var rev=0;
-snap.forEach(function(doc){
-var d=doc.data();
-rev += (d.deposited||0);
-});
-document.getElementById('totalRevenue').textContent='₹'+rev;
-document.getElementById('totalRevenue').classList.remove('loading');
-alert('5. Revenue: ₹' + rev);
-}).catch(function(e){
-alert('4. USERS ERROR: ' + e.message);
-});
-
-// Test: Deposits
-db.collection('deposits').get().then(function(snap){
-var c=0;
-snap.forEach(function(doc){
-var d=doc.data();
-if((d.status||'').toLowerCase()==='pending')c++;
-});
-alert('6. Pending deposits: ' + c);
-document.getElementById('pendingDeposits').textContent=c;
-document.getElementById('pendingDeposits').classList.remove('loading');
-}).catch(function(e){
-alert('6. DEPOSITS ERROR: ' + e.message);
-});
-
-// Test: Withdrawals
-db.collection('withdrawals').get().then(function(snap){
-var c=0;
-snap.forEach(function(doc){
-var d=doc.data();
-if((d.status||'').toLowerCase()==='pending')c++;
-});
-alert('7. Pending withdrawals: ' + c);
-}).catch(function(e){
-alert('7. WITHDRAWALS ERROR: ' + e.message);
-});
-
-// Test: Redeem
-db.collection('redeem_requests').get().then(function(snap){
-var c=0;
-snap.forEach(function(doc){
-var d=doc.data();
-if((d.status||'').toLowerCase()==='pending')c++;
-});
-alert('8. Pending redeem: ' + c);
-}).catch(function(e){
-alert('8. REDEEM ERROR: ' + e.message);
+document.getElementById('logoutPopup').addEventListener('click',function(e){
+if(e.target===this)closeLogoutPopup();
 });
 </script>
 </body>
-</html>                                                                           </div>
+                                                             </html>
