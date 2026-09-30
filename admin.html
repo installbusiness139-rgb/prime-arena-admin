@@ -183,126 +183,86 @@ var db=firebase.firestore();
 
 var SESSION_KEY='primeArenaAdmin';
 
-function openLogoutPopup(){
-document.getElementById('logoutPopup').classList.add('show');
-}
-function closeLogoutPopup(){
-document.getElementById('logoutPopup').classList.remove('show');
-}
+function openLogoutPopup(){document.getElementById('logoutPopup').classList.add('show');}
+function closeLogoutPopup(){document.getElementById('logoutPopup').classList.remove('show');}
 function confirmLogout(){
-try{
-sessionStorage.removeItem(SESSION_KEY);
-localStorage.removeItem(SESSION_KEY);
-}catch(e){}
+try{sessionStorage.removeItem(SESSION_KEY);localStorage.removeItem(SESSION_KEY);}catch(e){}
 location.href='admin-login.html';
 }
+document.getElementById('logoutPopup').addEventListener('click',function(e){if(e.target===this)closeLogoutPopup();});
 
-document.getElementById('logoutPopup').addEventListener('click',function(e){
-if(e.target===this)closeLogoutPopup();
-});
+function setBadge(id,count){
+var el=document.getElementById(id);
+if(!el)return;
+if(count>0){el.textContent=count;el.classList.add('show');}
+else{el.classList.remove('show');}
+}
 
-// ============ LOAD ALL COUNTS ============
-function loadAllCounts(){
-// Users + Revenue
-db.collection('users').get().then(function(snap){
-var usersEl=document.getElementById('totalUsers');
-usersEl.textContent=snap.size;
-usersEl.classList.remove('loading');
+function safeNum(n){return (typeof n==='number'&&!isNaN(n))?n:0;}
 
+// === USERS + REVENUE ===
+db.collection('users').onSnapshot(function(snap){
+var el=document.getElementById('totalUsers');
+if(el){el.textContent=snap.size;el.classList.remove('loading');}
 var revenue=0;
-snap.forEach(function(doc){
-var d=doc.data();
-revenue+=(d.deposited||0);
-});
+snap.forEach(function(doc){var d=doc.data();revenue+=safeNum(d.deposited);});
 var revEl=document.getElementById('totalRevenue');
-revEl.textContent='₹'+revenue;
-revEl.classList.remove('loading');
-}).catch(function(e){
-console.warn('Users error:',e.message);
-var usersEl=document.getElementById('totalUsers');
-usersEl.textContent='0';
-usersEl.classList.remove('loading');
-var revEl=document.getElementById('totalRevenue');
-revEl.textContent='₹0';
-revEl.classList.remove('loading');
-});
+if(revEl){revEl.textContent='₹'+revenue;revEl.classList.remove('loading');}
+},function(err){console.error('Users:',err.message);});
 
-// Active Matches
-db.collection('matches').where('status','==','upcoming').get().then(function(snap){
+// === ACTIVE MATCHES ===
+db.collection('matches').onSnapshot(function(snap){
+var c=0;
+snap.forEach(function(doc){var d=doc.data();if((d.status||'').toLowerCase()==='upcoming')c++;});
 var el=document.getElementById('activeMatches');
-el.textContent=snap.size;
-el.classList.remove('loading');
-}).catch(function(e){
+if(el){el.textContent=c;el.classList.remove('loading');}
+},function(err){
+console.error('Matches:',err.message);
 var el=document.getElementById('activeMatches');
-el.textContent='0';
-el.classList.remove('loading');
+if(el){el.textContent='0';el.classList.remove('loading');}
 });
 
-// Pending Deposits
-db.collection('deposits').where('status','==','pending').get().then(function(snap){
-var c=snap.size;
+// === DEPOSITS ===
+db.collection('deposits').onSnapshot(function(snap){
+var c=0;
+snap.forEach(function(doc){var d=doc.data();if((d.status||'').toLowerCase()==='pending')c++;});
 var el=document.getElementById('pendingDeposits');
-el.textContent=c;
-el.classList.remove('loading');
-var badge=document.getElementById('pendingDepositsBadge');
-var listBadge=document.getElementById('depositsBadge');
-if(c>0){
-badge.textContent=c;
-badge.classList.add('show');
-listBadge.textContent=c;
-listBadge.classList.add('show');
-document.getElementById('pendingDepositsCard').classList.add('alert');
-}else{
-badge.classList.remove('show');
-listBadge.classList.remove('show');
-document.getElementById('pendingDepositsCard').classList.remove('alert');
-}
-}).catch(function(e){
+if(el){el.textContent=c;el.classList.remove('loading');}
+setBadge('pendingDepositsBadge',c);
+setBadge('depositsBadge',c);
+var card=document.getElementById('pendingDepositsCard');
+if(card){if(c>0)card.classList.add('alert');else card.classList.remove('alert');}
+},function(err){
+console.error('Deposits:',err.message);
 var el=document.getElementById('pendingDeposits');
-el.textContent='0';
-el.classList.remove('loading');
+if(el){el.textContent='0';el.classList.remove('loading');}
 });
 
-// Pending Withdrawals
-db.collection('withdrawals').where('status','==','pending').get().then(function(snap){
-var c=snap.size;
-var listBadge=document.getElementById('withdrawalsBadge');
-if(c>0){
-listBadge.textContent=c;
-listBadge.classList.add('show');
-}else{
-listBadge.classList.remove('show');
-}
-}).catch(function(e){});
+// === WITHDRAWALS ===
+db.collection('withdrawals').onSnapshot(function(snap){
+var c=0;
+snap.forEach(function(doc){var d=doc.data();if((d.status||'').toLowerCase()==='pending')c++;});
+setBadge('withdrawalsBadge',c);
+console.log('Withdrawals pending:',c);
+},function(err){console.error('Withdrawals:',err.message);});
 
-// Pending Redeem
-db.collection('redeem_requests').where('status','==','pending').get().then(function(snap){
-var c=snap.size;
-var listBadge=document.getElementById('redeemBadge');
-if(c>0){
-listBadge.textContent=c;
-listBadge.classList.add('show');
-}else{
-listBadge.classList.remove('show');
-}
-}).catch(function(e){});
+// === REDEEM ===
+db.collection('redeem_requests').onSnapshot(function(snap){
+var c=0;
+snap.forEach(function(doc){var d=doc.data();if((d.status||'').toLowerCase()==='pending')c++;});
+setBadge('redeemBadge',c);
+console.log('Redeem pending:',c);
+},function(err){console.error('Redeem:',err.message);});
 
-// Pending Reports
-db.collection('reports').where('status','==','pending').get().then(function(snap){
-var c=snap.size;
-var listBadge=document.getElementById('reportsBadge');
-if(c>0){
-listBadge.textContent=c;
-listBadge.classList.add('show');
-}else{
-listBadge.classList.remove('show');
-}
-}).catch(function(e){});
-}
+// === REPORTS ===
+db.collection('reports').onSnapshot(function(snap){
+var c=0;
+snap.forEach(function(doc){var d=doc.data();if((d.status||'').toLowerCase()==='pending')c++;});
+setBadge('reportsBadge',c);
+console.log('Reports pending:',c);
+},function(err){console.error('Reports:',err.message);});
 
-// Load on page start
-loadAllCounts();
-setInterval(loadAllCounts,30000);
+console.log('✅ Admin dashboard loaded');
 </script>
 </body>
-  </html>
+</html>
