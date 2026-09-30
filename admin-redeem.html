@@ -130,8 +130,8 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 <div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
 <div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
 <div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-  </div>
-  <script>
+                                                    </div>
+                                                    <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -185,22 +185,44 @@ timerIntervals.push(setInterval(update,1000));
 });
 }
 
-function showPopup(icon,title,msg,buttons){
+// ============ FIXED POPUP FUNCTIONS ============
+function showConfirm(icon,title,msg,btnLabel,btnClass,callback){
 document.getElementById('popupIcon').textContent=icon;
 document.getElementById('popupTitle').textContent=title;
 document.getElementById('popupMsg').textContent=msg;
 var btnRow=document.getElementById('popupButtons');
 btnRow.innerHTML='';
-buttons.forEach(function(b){
-var btn=document.createElement('button');
-btn.textContent=b.label;
-btn.className='popup-btn '+(b.style||'popup-btn-confirm');
-btn.onclick=function(){
+var cancelBtn=document.createElement('button');
+cancelBtn.textContent='CANCEL';
+cancelBtn.className='popup-btn popup-btn-cancel';
+cancelBtn.onclick=function(){
 document.getElementById('customPopup').classList.remove('show');
-if(b.action)b.action();
 };
-btnRow.appendChild(btn);
-});
+var confirmBtn=document.createElement('button');
+confirmBtn.textContent=btnLabel;
+confirmBtn.className='popup-btn '+(btnClass||'popup-btn-confirm');
+confirmBtn.onclick=function(){
+document.getElementById('customPopup').classList.remove('show');
+if(callback)callback();
+};
+btnRow.appendChild(cancelBtn);
+btnRow.appendChild(confirmBtn);
+document.getElementById('customPopup').classList.add('show');
+}
+
+function showAlert(icon,title,msg){
+document.getElementById('popupIcon').textContent=icon;
+document.getElementById('popupTitle').textContent=title;
+document.getElementById('popupMsg').textContent=msg;
+var btnRow=document.getElementById('popupButtons');
+btnRow.innerHTML='';
+var okBtn=document.createElement('button');
+okBtn.textContent='OK';
+okBtn.className='popup-btn popup-btn-confirm';
+okBtn.onclick=function(){
+document.getElementById('customPopup').classList.remove('show');
+};
+btnRow.appendChild(okBtn);
 document.getElementById('customPopup').classList.add('show');
 }
 
@@ -343,11 +365,11 @@ var codeInput=document.getElementById('code-'+id);
 var code=codeInput.value.trim();
 
 if(!code){
-showPopup('⚠️','Code Missing','Please enter the redeem code before sending.','','warning');
+showAlert('⚠️','Code Missing','Please enter the redeem code before sending.');
 return;
 }
 
-showPopup('📤','Send Code?','Send this code to '+r.userName+' on WhatsApp?\n\nCode: '+code,'','success',function(){
+showConfirm('📤','Send Code?','Send this code to '+r.userName+' on WhatsApp?'+'\n\nCode: '+code,'SEND','popup-btn-confirm',function(){
 showLoading('Sending code...');
 db.collection('redeem_requests').doc(id).update({
 status:'completed',
@@ -362,7 +384,7 @@ showToast('✅ Code sent! Request completed.');
 loadRedeems();
 }).catch(function(e){
 hideLoading();
-showPopup('❌','Error',e.message,'','error');
+showAlert('❌','Error',e.message);
 });
 });
 }
@@ -370,7 +392,7 @@ showPopup('❌','Error',e.message,'','error');
 function rejectRedeem(id){
 var r=allRedeems.find(function(x){return x.id===id});
 if(!r)return;
-showPopup('⚠️','Reject Request?','Reject '+r.userName+'\'s redeem request of '+r.coins+' coins?','','danger',function(){
+showConfirm('⚠️','Reject Request?','Reject '+r.userName+'\'s redeem request of '+r.coins+' coins?','REJECT','popup-btn-danger',function(){
 showLoading('Rejecting...');
 db.collection('redeem_requests').doc(id).update({
 status:'rejected',
@@ -381,13 +403,13 @@ showToast('Request rejected.');
 loadRedeems();
 }).catch(function(e){
 hideLoading();
-showPopup('❌','Error',e.message,'','error');
+showAlert('❌','Error',e.message);
 });
 });
 }
 
 function deleteRedeem(id){
-showPopup('🗑','Delete Request?','This will permanently delete this request.','','danger',function(){
+showConfirm('🗑','Delete Request?','This will permanently delete this request.','DELETE','popup-btn-danger',function(){
 showLoading('Deleting...');
 db.collection('redeem_requests').doc(id).delete().then(function(){
 hideLoading();
@@ -395,7 +417,7 @@ showToast('Request deleted.');
 loadRedeems();
 }).catch(function(e){
 hideLoading();
-showPopup('❌','Error',e.message,'','error');
+showAlert('❌','Error',e.message);
 });
 });
 }
