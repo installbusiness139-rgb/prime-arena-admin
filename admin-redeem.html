@@ -130,8 +130,8 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 <div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
 <div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
 <div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-                                                    </div>
-                                                    <script>
+  </div>
+  <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -172,7 +172,7 @@ var valEl=el.querySelector('.tval');
 var lblEl=el.querySelector('.tlbl');
 if(rem===null){
 el.classList.add('over');
-if(valEl)valEl.textContent='⏰ TIME OVER';
+if(valEl)valEl.textContent='TIME OVER';
 if(lblEl)lblEl.textContent='DEADLINE CROSSED';
 }else{
 el.classList.remove('over');
@@ -185,7 +185,6 @@ timerIntervals.push(setInterval(update,1000));
 });
 }
 
-// ============ FIXED POPUP FUNCTIONS ============
 function showConfirm(icon,title,msg,btnLabel,btnClass,callback){
 document.getElementById('popupIcon').textContent=icon;
 document.getElementById('popupTitle').textContent=title;
@@ -369,7 +368,7 @@ showAlert('⚠️','Code Missing','Please enter the redeem code before sending.'
 return;
 }
 
-showConfirm('📤','Send Code?','Send this code to '+r.userName+' on WhatsApp?'+'\n\nCode: '+code,'SEND','popup-btn-confirm',function(){
+showConfirm('📤','Send Code?','Send code to '+r.userName+'?\n\nCode will appear in the user\'s app notification.\nWhatsApp me sirf alert jayega.','SEND','popup-btn-confirm',function(){
 showLoading('Sending code...');
 db.collection('redeem_requests').doc(id).update({
 status:'completed',
@@ -377,10 +376,10 @@ redeemCode:code,
 completedAt:new Date().toISOString()
 }).then(function(){
 hideLoading();
-var msg='🎁 *Prime Arena - Redeem Code*\n\nHello '+r.userName+'!\n\nYour redeem code is ready:\n\n*'+code+'*\n\n📌 For: '+r.coins+' coins (₹'+r.amountINR+')\n\n⚠️ Use this code in Free Fire app.\n\nThank you for playing with Prime Arena! 🎮';
+var msg='🎁 *Prime Arena*\n\nHello '+r.userName+'!\n\n✅ Aapka redeem code app me bhej diya gaya hai.\n\n📱 App kholo → 🔔 Notification me jaao → Apna code copy karo.\n\n⚠️ Code app me safe rakha gaya hai. Kisi ke saath share na karein.\n\nThank you for playing! 🎮';
 var waUrl='https://wa.me/91'+r.whatsappNumber+'?text='+encodeURIComponent(msg);
 window.open(waUrl,'_blank');
-showToast('✅ Code sent! Request completed.');
+showToast('✅ Code sent to app! WhatsApp notified.');
 loadRedeems();
 }).catch(function(e){
 hideLoading();
