@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Setup - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:#fff;font-family:Arial;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.box{width:100%;max-width:420px}
+.card{background:#1a1f3a;border:1px solid #2a2f4a;border-radius:15px;padding:25px}
+.card h2{font-size:18px;color:#ffa500;margin-bottom:8px;text-align:center}
+.card p{font-size:12px;color:#888;text-align:center;margin-bottom:20px;line-height:1.5}
+.fg{margin-bottom:15px}
+.fg label{display:block;font-size:11px;color:#aaa;margin-bottom:6px;letter-spacing:.5px}
+.fg input{width:100%;padding:14px;background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;color:#fff;font-size:14px;outline:none;font-family:inherit}
+.fg input:focus{border-color:#ffa500}
+.btn{width:100%;padding:15px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px;margin-top:5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{padding:12px;border-radius:10px;font-size:13px;margin-bottom:15px;text-align:center;line-height:1.5;display:none}
+.msg.err{background:rgba(255,49,49,.15);border:1px solid #ff3131;color:#ff3131;display:block}
+.msg.ok{background:rgba(0,200,83,.15);border:1px solid #00c853;color:#00c853;display:block}
+.warn{background:rgba(255,165,0,.1);border:1px solid #ffa500;border-radius:10px;padding:12px;font-size:11px;color:#ffa500;line-height:1.6;margin-bottom:18px}
+</style>
+</head>
+<body>
+<div class="box">
+<div class="card">
+<h2>🔐 ADMIN SETUP</h2>
+<p>One-time setup — password Firestore में safe रहेगा</p>
+
+<div class="warn">
+⚠️ <b>ध्यान दें:</b> ये page सिर्फ एक बार use करना है।<br>
+Password set होने के बाद इसे GitHub से delete कर दें।
+</div>
+
+<div class="msg" id="msg"></div>
+
+<div class="fg">
+<label>NEW ADMIN PASSWORD</label>
+<input type="password" id="p1" placeholder="Enter new password (min 8 chars)">
+</div>
+
+<div class="fg">
+<label>CONFIRM PASSWORD</label>
+<input type="password" id="p2" placeholder="Re-enter password">
+</div>
+
+<button class="btn" id="btn" onclick="setup()">💾 SET PASSWORD</button>
+</div>
+</div>
+
+<script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
+function showMsg(text,type){
+var m=document.getElementById('msg');
+m.textContent=text;
+m.className='msg '+(type||'err');
+}
+
+async function sha256(text){
+var enc=new TextEncoder();
+var data=enc.encode(text);
+var hash=await crypto.subtle.digest('SHA-256',data);
+var arr=Array.from(new Uint8Array(hash));
+return arr.map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+}
+
+async function setup(){
+var p1=document.getElementById('p1').value;
+var p2=document.getElementById('p2').value;
+var btn=document.getElementById('btn');
+
+if(!p1||p1.length<8){
+showMsg('Password must be at least 8 characters.','err');
+return;
+}
+if(p1!==p2){
+showMsg('Passwords do not match!','err');
+return;
+}
+
+btn.disabled=true;
+btn.textContent='CHECKING...';
+
+try{
+// Check if already set up
+var existing=await db.collection('settings').doc('admin').get();
+
+if(existing.exists&&existing.data().passwordHash){
+// Already set up — refuse
+btn.disabled=false;
+btn.textContent='💾 SET PASSWORD';
+showMsg('❌ Admin already set up! Setup page is now disabled. Delete this file from GitHub.','err');
+return;
+}
+
+// Save hash
+var hash=await sha256(p1);
+
+await db.collection('settings').doc('admin').set({
+passwordHash:hash,
+createdAt:new Date().toISOString(),
+updatedAt:new Date().toISOString()
+});
+
+btn.textContent='✅ SUCCESS!';
+showMsg('✅ Password set successfully! Now delete this file from GitHub.','ok');
+
+}catch(e){
+btn.disabled=false;
+btn.textContent='💾 SET PASSWORD';
+showMsg('Error: '+e.message,'err');
+}
+}
+</script>
+</body>
+  </html>
