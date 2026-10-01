@@ -25,12 +25,18 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .status-pending{background:#ffa500;color:#0a0e27}
 .status-paid{background:#00c853;color:white}
 .status-rejected{background:#ff3131;color:white}
+
+/* ============ USER INFO SECTION (NEW) ============ */
+.user-info-section{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:12px;margin-bottom:12px}
+.user-info-section .ui-title{font-size:10px;color:#ffa500;letter-spacing:1px;margin-bottom:8px;font-weight:bold}
+
 .withdraw-details{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-size:12px}
 .detail-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .detail-label{color:#666;flex-shrink:0}
 .detail-value{color:#ccc;font-weight:500;word-break:break-all;text-align:right;max-width:65%}
 .detail-value.upi{color:#ffa500;font-family:monospace;letter-spacing:1px}
 .detail-value.method{color:#00c853;font-weight:bold}
+
 .balance-section{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:12px;margin-bottom:12px}
 .balance-section.safe{border-color:#00c853;background:rgba(0,200,83,0.08)}
 .balance-section.warning{border-color:#ff3131;background:rgba(255,49,49,0.1)}
@@ -46,6 +52,7 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .balance-item.total .bi-value{color:#fff}
 .balance-warning-msg{font-size:10px;color:#ff6b6b;text-align:center;margin-top:8px;line-height:1.4}
 .balance-safe-msg{font-size:10px;color:#00e676;text-align:center;margin-top:8px;line-height:1.4;font-weight:bold}
+
 .timer-display{background:#0a0e27;border:2px solid #ffa500;border-radius:10px;padding:10px;margin-bottom:12px;text-align:center}
 .timer-display.over{border-color:#ff3131}
 .timer-display .tlabel{font-size:9px;color:#ffa500;letter-spacing:2px;margin-bottom:5px}
@@ -53,6 +60,7 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .timer-display .tvalue{font-size:22px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:2px}
 .timer-display.over .tvalue{color:#ff3131;font-size:16px}
 .timer-display .tsub{font-size:9px;color:#666;margin-top:3px}
+
 .action-buttons{display:flex;gap:10px}
 .paid-btn{flex:1;padding:12px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:8px;color:white;font-size:13px;font-weight:bold;cursor:pointer}
 .reject-btn{flex:1;padding:12px;background:linear-gradient(135deg,#ff3131,#ff5252);border:none;border-radius:8px;color:white;font-size:13px;font-weight:bold;cursor:pointer}
@@ -70,7 +78,7 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:14px;padding:25px 20px;width:100%;max-width:360px;text-align:center}
 .popup-icon{font-size:45px;margin-bottom:12px}
 .popup-title{color:#fca311;font-size:19px;font-weight:bold;margin-bottom:10px}
-.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px}
+.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px;white-space:pre-line}
 .popup-buttons{display:flex;gap:10px}
 .popup-btn{flex:1;padding:13px;border:none;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;text-transform:uppercase}
 .popup-btn-cancel{background:#2a2d3e;color:#fff}
@@ -126,8 +134,9 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 <div class="nav-item" onclick="location.href='admin-deposits.html'"><span class="nav-icon">💳</span><span>Deposits</span></div>
 <div class="nav-item active" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
 <div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-                                                 </div>
-                                                 <script>
+</div>
+
+<script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
