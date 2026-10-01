@@ -26,6 +26,7 @@ body{background:#0a0e27;color:#fff;font-family:Arial;min-height:100vh;display:fl
 .err.show{display:block}
 .back{text-align:center;margin-top:15px}
 .back a{color:#888;font-size:12px;text-decoration:none}
+.attempts-info{font-size:10px;color:#666;text-align:center;margin-top:10px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -44,6 +45,7 @@ body{background:#0a0e27;color:#fff;font-family:Arial;min-height:100vh;display:fl
 <input type="password" id="adminPass" placeholder="Enter admin password" autocomplete="off">
 </div>
 <button class="login-btn" id="loginBtn" onclick="adminLogin()">LOGIN</button>
+<div class="attempts-info" id="attemptsInfo"></div>
 </div>
 
 <div class="back">
@@ -52,8 +54,15 @@ body{background:#0a0e27;color:#fff;font-family:Arial;min-height:100vh;display:fl
 </div>
 
 <script>
-var ADMIN_PASSWORD="Primearena#@02729373#";
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
 var SESSION_KEY="primeArenaAdmin";
+var MAX_ATTEMPTS=5;
+var LOCK_MINUTES=5;
+var ATTEMPT_KEY="primeArenaAdminAttempts";
 
 function showErr(m){
 var e=document.getElementById('errMsg');
@@ -61,7 +70,41 @@ e.textContent=m;
 e.classList.add('show');
 }
 
-function adminLogin(){
+async function sha256(text){
+var enc=new TextEncoder();
+var data=enc.encode(text);
+var hash=await crypto.subtle.digest('SHA-256',data);
+var arr=Array.from(new Uint8Array(hash));
+return arr.map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+}
+
+function getAttemptData(){
+try{
+return JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'{}');
+}catch(e){return {};}
+}
+
+function setAttemptData(d){
+try{localStorage.setItem(ATTEMPT_KEY,JSON.stringify(d));}catch(e){}
+}
+
+function updateAttemptsInfo(){
+var d=getAttemptData();
+var info=document.getElementById('attemptsInfo');
+if(d.lockUntil&&Date.now()<d.lockUntil){
+var mins=Math.ceil((d.lockUntil-Date.now())/60000);
+info.textContent='🔒 Locked for '+mins+' minute(s)';
+info.style.color='#ff3131';
+}else if(d.count&&d.count>0){
+var left=MAX_ATTEMPTS-d.count;
+info.textContent='⚠️ '+left+' attempt(s) left';
+info.style.color='#ffa500';
+}else{
+info.textContent='';
+}
+}
+
+async function adminLogin(){
 var pass=document.getElementById('adminPass').value;
 var btn=document.getElementById('loginBtn');
 document.getElementById('errMsg').classList.remove('show');
@@ -71,32 +114,78 @@ showErr('Please enter password');
 return;
 }
 
+// Check lock
+var att=getAttemptData();
+if(att.lockUntil&&Date.now()<att.lockUntil){
+var mins=Math.ceil((att.lockUntil-Date.now())/60000);
+showErr('Too many wrong attempts. Locked for '+mins+' minute(s).');
+return;
+}
+
 btn.disabled=true;
 btn.textContent='CHECKING...';
 
-setTimeout(function(){
-if(pass===ADMIN_PASSWORD){
+try{
+// Fetch password hash from Firestore
+var doc=await db.collection('settings').doc('admin').get();
+
+if(!doc.exists||!doc.data().passwordHash){
+btn.disabled=false;
+btn.textContent='LOGIN';
+showErr('Admin setup not done. Please run admin-setup.html first.');
+return;
+}
+
+var storedHash=doc.data().passwordHash;
+var inputHash=await sha256(pass);
+
+if(inputHash===storedHash){
+// SUCCESS
 try{
 sessionStorage.setItem(SESSION_KEY,'true');
 localStorage.setItem(SESSION_KEY,'true');
 }catch(e){}
+
+setAttemptData({});
 btn.textContent='SUCCESS!';
 btn.style.background='linear-gradient(135deg,#00c853,#00e676)';
 setTimeout(function(){
 window.location.href='admin.html';
 },500);
 }else{
+// WRONG PASSWORD
+var count=(att.count||0)+1;
+var newAtt={count:count};
+
+if(count>=MAX_ATTEMPTS){
+newAtt.lockUntil=Date.now()+(LOCK_MINUTES*60*1000);
+newAtt.count=0;
+}
+
+setAttemptData(newAtt);
 btn.disabled=false;
 btn.textContent='LOGIN';
-showErr('Wrong password! Try again.');
 document.getElementById('adminPass').value='';
+updateAttemptsInfo();
+
+if(count>=MAX_ATTEMPTS){
+showErr('🚫 Too many wrong attempts! Locked for '+LOCK_MINUTES+' minutes.');
+}else{
+showErr('Wrong password! '+(MAX_ATTEMPTS-count)+' attempt(s) left.');
 }
-},300);
+}
+}catch(e){
+btn.disabled=false;
+btn.textContent='LOGIN';
+showErr('Error: '+e.message);
+}
 }
 
 document.getElementById('adminPass').addEventListener('keypress',function(e){
 if(e.key==='Enter')adminLogin();
 });
+
+updateAttemptsInfo();
 </script>
 </body>
 </html>
