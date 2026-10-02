@@ -8,22 +8,18 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:100vh;padding-bottom:80px}
-
 .admin-topbar{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100}
 .admin-topbar-left{display:flex;align-items:center;gap:10px}
 .admin-badge{background:linear-gradient(135deg,#ff6b00,#ffa500);color:white;font-size:11px;padding:5px 12px;border-radius:15px;font-weight:bold}
 .admin-topbar-title{font-size:16px;font-weight:bold}
 .logout-small{background:#ff3131;border:none;color:white;font-size:11px;padding:8px 15px;border-radius:8px;font-weight:bold;cursor:pointer}
-
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
 .stat-card{background:#1a1f3a;border-radius:12px;padding:15px;border:1px solid #2a2f4a;position:relative}
 .stat-icon{font-size:24px;margin-bottom:8px}
 .stat-value{font-size:24px;font-weight:bold;color:#ffa500;margin-bottom:4px}
 .stat-value.loading{color:#666;font-size:18px}
 .stat-label{font-size:11px;color:#ccc}
-
 .section-head{padding:15px;font-size:14px;font-weight:bold;color:#ffa500}
-
 .action-list{padding:0 15px}
 .action-item{display:flex;align-items:center;justify-content:space-between;background:#1a1f3a;border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;border:1px solid #2a2f4a}
 .action-item:active{background:#2a2f4a}
@@ -34,12 +30,10 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 .action-arrow{font-size:18px;color:#666}
 .badge-count{background:#ff3131;color:white;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold;min-width:22px;text-align:center;display:none}
 .badge-count.show{display:inline-block}
-
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #2a2f4a;z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:#666;font-size:9px;padding:5px 8px;flex:1}
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:20px}
-
 .popup-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:20px}
 .popup-overlay.show{display:flex}
 .popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:12px;padding:25px 20px;width:100%;max-width:350px;text-align:center}
@@ -49,7 +43,6 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 .popup-btn{flex:1;padding:12px;border:none;border-radius:8px;font-weight:bold;font-size:15px;cursor:pointer;text-transform:uppercase}
 .popup-btn-cancel{background:#2a2d3e;color:#ffffff}
 .popup-btn-confirm{background:#10b981;color:#ffffff}
-
 .blocked-screen{display:none;padding:60px 20px;text-align:center}
 .blocked-screen.show{display:block}
 .blocked-icon{font-size:60px;opacity:.5;margin-bottom:15px}
@@ -146,6 +139,11 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;min-height:10
 <div class="action-item" onclick="location.href='admin-reports.html'">
 <div class="action-left"><span class="action-icon">🚩</span><span class="action-text">Player Reports</span></div>
 <div class="action-right"><span class="badge-count" id="badgeReports">0</span><span class="action-arrow">›</span></div>
+</div>
+
+<div class="action-item" onclick="location.href='admin-password-resets.html'">
+<div class="action-left"><span class="action-icon">🔐</span><span class="action-text">Password Reset Requests</span></div>
+<div class="action-right"><span class="badge-count" id="badgeResets">0</span><span class="action-arrow">›</span></div>
 </div>
 
 <div class="action-item" onclick="location.href='admin-stats.html'">
@@ -290,14 +288,17 @@ pendingDeposits++;
 // Withdrawals
 var withdrawalsSnap=await db.collection('withdrawals').get();
 var totalWithdrawn=0;
+var pendingW=0;
 withdrawalsSnap.forEach(function(doc){
 var d=doc.data();
 if(d.status==='paid'){
 totalWithdrawn+=(parseInt(d.amount)||0);
+}else if(d.status==='pending'){
+pendingW++;
 }
 });
 
-// Revenue = deposits received - withdrawals paid
+// Revenue
 var revenue=totalDeposited-totalWithdrawn;
 document.getElementById('totalRevenue').textContent='₹'+revenue;
 document.getElementById('totalRevenue').classList.remove('loading');
@@ -317,17 +318,10 @@ document.getElementById('activeMatches').textContent=activeMatches;
 document.getElementById('activeMatches').classList.remove('loading');
 
 // ============ BADGES ============
-// Pending Deposits Badge
 setBadge('badgeDeposits',pendingDeposits);
-
-// Pending Withdrawals Badge
-var pendingW=0;
-withdrawalsSnap.forEach(function(doc){
-if(doc.data().status==='pending')pendingW++;
-});
 setBadge('badgeWithdrawals',pendingW);
 
-// Pending Redeems Badge
+// Pending Redeems
 var redeemSnap=await db.collection('redeem_requests').get();
 var pendingR=0;
 redeemSnap.forEach(function(doc){
@@ -336,7 +330,7 @@ if(!s||s==='pending')pendingR++;
 });
 setBadge('badgeRedeem',pendingR);
 
-// Pending Reports Badge
+// Pending Reports
 var reportsSnap=await db.collection('reports').get();
 var pendingRep=0;
 reportsSnap.forEach(function(doc){
@@ -344,6 +338,14 @@ var s=doc.data().status;
 if(!s||s==='pending')pendingRep++;
 });
 setBadge('badgeReports',pendingRep);
+
+// Pending Password Resets
+var resetsSnap=await db.collection('password_reset_requests').get();
+var pendingResets=0;
+resetsSnap.forEach(function(doc){
+if(doc.data().status==='pending')pendingResets++;
+});
+setBadge('badgeResets',pendingResets);
 
 }catch(e){
 console.error('Stats load error:',e);
