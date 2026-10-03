@@ -32,7 +32,7 @@ body{background:#0f121d;color:white;font-family:Arial;padding:0 0 30px 0;min-hei
 .btn-delete:active{transform:scale(.97)}
 .add-btn{width:100%;padding:15px;background:linear-gradient(135deg,#6a1b9a,#8e24aa);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;margin-bottom:15px}
 .add-btn:active{transform:scale(.98)}
-.save-all-btn{width:100%;padding:16px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;margin-top:8px;text-transform:uppercase;letter-spacing:1px;position:sticky;bottom:15px;box-shadow:0 5px 20px rgba(255,165,0,.3);z-index:50}
+.save-all-btn{width:100%;padding:16px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;margin-top:8px;text-transform:uppercase;letter-spacing:1px}
 .save-all-btn:active{transform:scale(.98)}
 .empty-box{background:#1a1f3a;border:1px dashed #2a2f4a;border-radius:12px;padding:40px 20px;text-align:center;color:#666;margin-bottom:15px}
 .empty-box .ic{font-size:50px;opacity:.5;margin-bottom:10px}
@@ -61,9 +61,9 @@ body{background:#0f121d;color:white;font-family:Arial;padding:0 0 30px 0;min-hei
 <div class="wrap">
 <div class="info">
 <b>💡 Kaise kaam karta hai:</b><br>
-• Har banner me sirf <b>Image URL</b> aur <b>Link</b> daalna hai<br>
-• Home page par auto-scroll honge<br>
-• User banner par click karega to seedha aapke link pe jayega<br>
+• Har banner me <b>Image URL</b> aur <b>Link</b> — dono optional hain<br>
+• Image nahi di to placeholder dikhega<br>
+• Link nahi diya to banner par click karne se kuch nahi hoga<br>
 • Link kuch bhi ho sakta hai — Telegram, Instagram, YouTube, Website<br>
 • Jitne marzi banners banao — koi limit nahi
 </div>
@@ -92,8 +92,8 @@ body{background:#0f121d;color:white;font-family:Arial;padding:0 0 30px 0;min-hei
 <div class="loading-overlay" id="loadingOverlay">
 <div class="spinner"></div>
 <div class="loading-text">Saving...</div>
-                                            </div>
-                                            <script>
+  </div>
+ <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -160,9 +160,9 @@ html+='<div class="banner-card">'+
 )+
 '</div>'+
 
-'<div class="fg"><label>Image URL *</label><input type="text" value="'+esc(b.image||'')+'" placeholder="https://i.ibb.co/...jpg" oninput="updateField('+i+',\'image\',this.value)"></div>'+
+'<div class="fg"><label>Image URL (Optional)</label><input type="text" value="'+esc(b.image||'')+'" placeholder="https://i.ibb.co/...jpg" oninput="updateField('+i+',\'image\',this.value)"></div>'+
 
-'<div class="fg"><label>Click karne par link *</label><input type="text" value="'+esc(b.link||'')+'" placeholder="https://t.me/primearena_official" oninput="updateField('+i+',\'link\',this.value)"></div>'+
+'<div class="fg"><label>Click karne par link (Optional)</label><input type="text" value="'+esc(b.link||'')+'" placeholder="https://t.me/primearena_official" oninput="updateField('+i+',\'link\',this.value)"></div>'+
 
 '<button class="btn-delete" onclick="deleteBanner('+i+')">🗑 DELETE THIS BANNER</button>'+
 
@@ -226,17 +226,6 @@ document.body.appendChild(p);
 }
 
 function saveAllBanners(){
-for(var i=0;i<banners.length;i++){
-if(!banners[i].image||!banners[i].image.trim()){
-showPopup('⚠️','Image Missing','Banner '+(i+1)+' me Image URL daalo.');
-return;
-}
-if(!banners[i].link||!banners[i].link.trim()){
-showPopup('⚠️','Link Missing','Banner '+(i+1)+' me Link daalo.');
-return;
-}
-}
-
 showLoading('Saving all banners...');
 
 db.collection('settings').doc('banners').set({
@@ -258,4 +247,4 @@ if(e.target===this)closePopup();
 });
 </script>
 </body>
-</html>
+</html> 
