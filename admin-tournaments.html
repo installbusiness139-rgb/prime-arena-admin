@@ -94,10 +94,13 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:80px}
 <div class="form-row">
 <div class="form-group">
 <label>MODE</label>
-<select id="matchMode">
+<select id="matchMode" onchange="onModeChange()">
 <option value="Solo">Solo</option>
 <option value="Duo">Duo</option>
 <option value="Squad">Squad</option>
+<option value="Team Duo">Team Duo (2 vs 2)</option>
+<option value="Team Squad">Team Squad (4 vs 4)</option>
+<option value="Team 6">Team 6 (6 vs 6)</option>
 </select>
 </div>
 <div class="form-group">
@@ -206,9 +209,8 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:80px}
 <div class="nav-item active" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
 <div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
 <div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-</div>
-
-<script>
+                           </div>
+                           <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -238,6 +240,35 @@ newConfirmBtn.addEventListener('click',function(){modal.style.display='none';res
 });
 }
 
+// ============ MODE CHANGE HANDLER ============
+function onModeChange(){
+var mode=document.getElementById('matchMode').value;
+var totalSlotsField=document.getElementById('totalSlots');
+if(mode==='Team Duo'){
+totalSlotsField.value='4';
+totalSlotsField.readOnly=true;
+totalSlotsField.style.opacity='0.6';
+totalSlotsField.style.cursor='not-allowed';
+}else if(mode==='Team Squad'){
+totalSlotsField.value='8';
+totalSlotsField.readOnly=true;
+totalSlotsField.style.opacity='0.6';
+totalSlotsField.style.cursor='not-allowed';
+}else if(mode==='Team 6'){
+totalSlotsField.value='12';
+totalSlotsField.readOnly=true;
+totalSlotsField.style.opacity='0.6';
+totalSlotsField.style.cursor='not-allowed';
+}else{
+totalSlotsField.readOnly=false;
+totalSlotsField.style.opacity='1';
+totalSlotsField.style.cursor='auto';
+if(mode==='Solo'&&!totalSlotsField.value)totalSlotsField.value='48';
+if(mode==='Duo'&&!totalSlotsField.value)totalSlotsField.value='24';
+if(mode==='Squad'&&!totalSlotsField.value)totalSlotsField.value='12';
+}
+}
+
 function openMatchModal(){
 editingMatchId=null;
 document.getElementById('modalTitle').textContent='CREATE NEW MATCH';
@@ -247,7 +278,10 @@ document.getElementById('matchMode').value='Solo';
 document.getElementById('matchMap').value='Bermuda';
 document.getElementById('entryFee').value='';
 document.getElementById('prizePool').value='';
-document.getElementById('totalSlots').value='';
+document.getElementById('totalSlots').value='48';
+document.getElementById('totalSlots').readOnly=false;
+document.getElementById('totalSlots').style.opacity='1';
+document.getElementById('totalSlots').style.cursor='auto';
 document.getElementById('joinedPlayers').value='0';
 document.getElementById('matchDate').value='';
 document.getElementById('matchTime').value='';
@@ -292,13 +326,14 @@ allMatches.forEach(function(m){
 var joined=m.joinedPlayers||0;
 var total=m.totalSlots||0;
 var slotsText=total>0?(joined+'/'+total):'N/A';
+var modeDisplay=m.mode||'Solo';
 html+='<div class="match-card">'+
 '<div class="match-header">'+
 '<div class="match-title">'+m.title+'</div>'+
 '<div class="match-status status-'+m.status+'">'+m.status+'</div>'+
 '</div>'+
 '<div class="match-details">'+
-'<div class="match-detail-item"><div class="match-detail-label">MODE</div><div class="match-detail-value">'+m.mode+'</div></div>'+
+'<div class="match-detail-item"><div class="match-detail-label">MODE</div><div class="match-detail-value">'+modeDisplay+'</div></div>'+
 '<div class="match-detail-item"><div class="match-detail-label">MAP</div><div class="match-detail-value">'+m.map+'</div></div>'+
 '<div class="match-detail-item"><div class="match-detail-label">ENTRY FEE</div><div class="match-detail-value">'+m.entryFee+' coins</div></div>'+
 '<div class="match-detail-item"><div class="match-detail-label">PRIZE POOL</div><div class="match-detail-value">'+m.prizePool+' coins</div></div>'+
@@ -326,10 +361,18 @@ var totalSlots=document.getElementById('totalSlots').value;
 if(!title){showPopup('Error!','Please enter match title',false);return;}
 if(!entryFee){showPopup('Error!','Please enter entry fee',false);return;}
 if(!totalSlots){showPopup('Error!','Please enter total slots',false);return;}
+
+var mode=document.getElementById('matchMode').value;
+
+// Auto-set slots for team modes
+if(mode==='Team Duo')totalSlots=4;
+else if(mode==='Team Squad')totalSlots=8;
+else if(mode==='Team 6')totalSlots=12;
+
 var matchData={
 title:title,
 bannerUrl:document.getElementById('bannerUrl').value.trim(),
-mode:document.getElementById('matchMode').value,
+mode:mode,
 map:document.getElementById('matchMap').value,
 entryFee:parseInt(entryFee),
 prizePool:parseInt(document.getElementById('prizePool').value)||0,
@@ -345,6 +388,16 @@ roomPass:document.getElementById('roomPass').value.trim(),
 rules:document.getElementById('matchRules').value.trim(),
 status:document.getElementById('matchStatus').value
 };
+
+if(mode==='Team Duo'||mode==='Team Squad'||mode==='Team 6'){
+matchData.isTeamMatch=true;
+if(mode==='Team Duo'){matchData.teamSize=2;matchData.teamASlots=2;matchData.teamBSlots=2;}
+else if(mode==='Team Squad'){matchData.teamSize=4;matchData.teamASlots=4;matchData.teamBSlots=4;}
+else if(mode==='Team 6'){matchData.teamSize=6;matchData.teamASlots=6;matchData.teamBSlots=6;}
+}else{
+matchData.isTeamMatch=false;
+}
+
 if(editingMatchId){
 db.collection('matches').doc(editingMatchId).update(matchData).then(function(){
 showToast('Match Updated!');
@@ -384,6 +437,20 @@ document.getElementById('roomId').value=m.roomId||'';
 document.getElementById('roomPass').value=m.roomPass||'';
 document.getElementById('matchRules').value=m.rules||'';
 document.getElementById('matchStatus').value=m.status||'upcoming';
+
+// Trigger mode change to set readOnly state
+var mode=m.mode||'Solo';
+var totalSlotsField=document.getElementById('totalSlots');
+if(mode==='Team Duo'||mode==='Team Squad'||mode==='Team 6'){
+totalSlotsField.readOnly=true;
+totalSlotsField.style.opacity='0.6';
+totalSlotsField.style.cursor='not-allowed';
+}else{
+totalSlotsField.readOnly=false;
+totalSlotsField.style.opacity='1';
+totalSlotsField.style.cursor='auto';
+}
+
 document.getElementById('matchModal').classList.add('show');
 }).catch(function(error){showPopup('Error!','Error: '+error.message,false)});
 }
@@ -410,4 +477,4 @@ document.getElementById('newBtn').addEventListener('click',openMatchModal);
 loadMatches();
 </script>
 </body>
-</html>
+  </html>
